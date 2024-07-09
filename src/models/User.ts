@@ -1,34 +1,28 @@
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 
-interface UserProps {
+import { Attributes } from './Attributes';
+import { Eventing } from './Eventing';
+import { ApiSync } from './ApiSync';
+import { Model } from './Model';
+
+export interface UserProps {
     name?: string;
     age?: number;
     id?: number;
 }
 
-export class User {
-    baseUrl: 'http://localhost:3000/';
-    constructor(private data: UserProps) {}
-    get(propName: string): number | string {
-        return this.data[propName];
-    }
-    set(update: UserProps): void {
-        // Object.assign(oldObj, newObj);
-        Object.assign(this.data, update);
+const baseUrl = 'http://localhost:3000/users';
+
+export class User extends Model<UserProps> {
+    static buildUser(attrs: UserProps): User {
+        return new User(
+            new Attributes<UserProps>(attrs),
+            new Eventing(),
+            new ApiSync<UserProps>(baseUrl)
+        );
     }
 
-    fetch(): void {
-        axios
-            .get(`http://localhost:3000/users/${this.get('id')}`)
-            .then((response: AxiosResponse): void => {
-                this.set(response.data);
-            });
-    }
-    save(): void {
-        if (this.get('id')) {
-            axios.put(`http://localhost:3000/users/${this.get('id')}`, this.data);
-        } else {
-            axios.post('http://localhost:3000/users', this.data);
-        }
+    isAdminUser(): boolean {
+        return this.get('id') === 1;
     }
 }

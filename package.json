@@ -5,9 +5,9 @@
     },
     "scripts": {
         "start:db": "json-server -w db.json",
-        "db": "run start:db",
+        "db": "npm run start:db",
         "start:parcel": "npx parcel index.html",
-        "parcel": "start:parcel"
+        "parcel": "npm run start:parcel"
     },
     "devDependencies": {
         "buffer": "^6.0.3"
