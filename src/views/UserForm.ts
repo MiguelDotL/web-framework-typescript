@@ -1,61 +1,43 @@
-import { User } from '../models/User';
+import { User, UserProps } from '../models/User';
+import { View } from './View';
 
-export class UserForm {
-    constructor(public parent: Element, public model: User) {
-        this.bindModel();
-    }
-    bindModel(): void {
-        this.model.on('change', () => {
-            this.render();
-        });
-    }
+export class UserForm extends View<User, UserProps> {
     eventsMap(): { [key: string]: () => void } {
         return {
-            'click:button#setAge': this.onSetAgeButtonClick
+            'click:button#setAge': this.onSetAge,
+            'click:button#setName': this.onSetName,
+            'click:button#save': this.onSave
         };
     }
 
-    onSetAgeButtonClick = (): void => {
+    onSetAge = (): void => {
         this.model.setRandomAge();
         console.log('onButtonClick fired 🔥', this.model.get('age'));
+    };
+    onSetName = (): void => {
+        const input = this.parent.querySelector('input');
+
+        if (input) {
+            const name = input?.value;
+            this.model.set({ name });
+        }
+    };
+
+    onSave = (): void => {
+        // this.onSetName();
+        // this.onSetAge();
+        this.model.save();
+        // console.log('onButtonClick fired 🔥', this.model.attributes.data);
     };
 
     template(): string {
         return `
             <div>
-                <h1> User Form</h1>
-                <div> User Name: ${this.model.get('name')}</div>
-                <div> User Age: ${this.model.get('age')}</div>
-                <input />
-                <button>Submit</button>
+                <input id="name" placeholder="${this.model.get('name')}" />
+                <button id="setName">Change Name</button>
                 <button id="setAge">Set Random Age</button>
-
+                <button id="save">Save User</button>
             </div>
         `;
-    }
-
-    bindEvents(fragment: DocumentFragment): void {
-        const eventsMap = this.eventsMap();
-
-        for (let eventKey in eventsMap) {
-            const [eventName, selector] = eventKey.split(':');
-
-            fragment.querySelectorAll(selector).forEach((element) => {
-                element.addEventListener(eventName, eventsMap[eventKey]);
-            });
-        }
-    }
-    render(): void {
-        // Clear existing children from parent element before rendering new ones.
-        this.parent.innerHTML = '';
-
-        // Create a DocumentFragment to hold the new elements.
-        const templateElement = document.createElement('template');
-
-        // Append the DocumentFragment to the parent element and bind events to the template element
-        templateElement.innerHTML = this.template();
-
-        this.bindEvents(templateElement.content);
-        this.parent.append(templateElement.content);
     }
 }
